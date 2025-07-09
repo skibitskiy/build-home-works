@@ -1,0 +1,23 @@
+.DS_Store
+
+.yarn/*
+.yarn/cache
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+
+node_modules
+
+dist
+vite
+webpack
+rollup
+esbuild
+
+# Playwright
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/

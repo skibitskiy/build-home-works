@@ -1,0 +1,19 @@
+{
+  "name": "build-homework",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "engines": {
+    "node": "22"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.51.1",
+    "@types/node": "^22.15.30",
+    "eslint": "^9.24.0",
+    "prettier": "^3.5.3"
+  },
+  "workspaces": [
+    "tasks/*"
+  ],
+  "packageManager": "yarn@4.9.2"
+}
