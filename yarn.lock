@@ -518,6 +518,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"bundler@workspace:tasks/builder":
+  version: 0.0.0-use.local
+  resolution: "bundler@workspace:tasks/builder"
+  languageName: unknown
+  linkType: soft
+
 "cacache@npm:^19.0.1":
   version: 19.0.1
   resolution: "cacache@npm:19.0.1"
