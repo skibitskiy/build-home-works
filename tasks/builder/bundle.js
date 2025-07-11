@@ -16,15 +16,60 @@ import path from "node:path";
 /**
  * @param {string} entryPath - путь к entry бандлинга
  */
-export function bundle(entryPath) {}
+export function bundle(entryPath) {
+  const cache = new Map()
+
+  const modulePaths = [entryPath]
+
+  while (modulePaths.length > 0) {
+    const modulePath = modulePaths.pop()
+
+    if (cache.has(modulePath)) {
+      continue
+    }
+
+    const moduleCode = fs.readFileSync(modulePath, "utf-8");
+
+    cache.set(modulePath, removeImportAndExport(moduleCode));
+
+    const dir = path.dirname(modulePath);
+
+    const requireCalls = searchRequireCalls(moduleCode, dir);
+
+    modulePaths.push(...requireCalls);
+  }
+
+  return [...cache.keys()].reverse().map((key) => {
+    return cache.get(key)
+  }).join('\n')
+}
+
+/**
+ * Функция удаляет все require и module.exports из кода
+ * 
+ * @param {string} code 
+ * @returns 
+ */
+function removeImportAndExport(code) {
+  const requireRegexpString = '(const|var|let).*=\\s*require\\(.+\\);?'
+
+  const exportsRegexpString = 'module\\.exports\\s*=\\s*\\{[^}]*\}\\s*;?'
+
+  const re = new RegExp(`(${requireRegexpString})|(${exportsRegexpString})`, 'g')
+
+  return code.replaceAll(re, '')
+}
 
 /**
  * Функция для поиска в файле вызовов require
  * Возвращает id модулей
  * @param {string} code 
  */
-function searchRequireCalls(code) {
-  return [...code.matchAll(/require\(('|")(.*)('|")\)/g)].map(
+function searchRequireCalls(code, dir) {
+  return [...code.matchAll(/require\(('|")(.*)('|")\)/g)]
+  .map(
     (item) => item[2]
-  );
+  ).map((name) => {
+    return path.join(dir, name)
+  });
 }
