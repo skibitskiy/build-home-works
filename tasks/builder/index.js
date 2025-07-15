@@ -1,4 +1,4 @@
-import fs from 'node:fs';
+import fs from "node:fs";
 
 import { bundle } from "./bundle.js";
 import path from 'node:path';
