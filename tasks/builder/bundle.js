@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { resolve } from '../3/resolve.js'
 
 const template = (runtime, entryPath) => `
 const cache = {};
@@ -56,15 +57,19 @@ export function bundle(entryPath) {
 
     const moduleCode = fs.readFileSync(modulePath, "utf-8");
 
-    const modulePathWithoutSrc = modulePath.replace(/(\.\/)?src\//gi, './')
-
-    cache.set(modulePathWithoutSrc, createCacheSet(modulePathWithoutSrc, moduleCode));
-
     const dir = path.dirname(modulePath);
 
-    const requireCalls = searchRequireCalls(moduleCode, dir);
+    const requireCalls = searchRequireCalls(moduleCode, dir, modulePath);
 
-    modulePaths.push(...requireCalls);
+    const transformedModuleCode = requireCalls.reduce((result, { absolutePath, relativePath }) => {
+      return result.replace(relativePath, absolutePath)
+    }, moduleCode)
+
+    cache.set(modulePath, createCacheSet(modulePath, transformedModuleCode));
+
+    const requireAbsolutePathes = requireCalls.map(({absolutePath}) => absolutePath)
+
+    modulePaths.push(...requireAbsolutePathes);
   }
 
   const cacheKeys = [...cache.keys()].reverse()
@@ -81,11 +86,11 @@ export function bundle(entryPath) {
  * Возвращает id модулей
  * @param {string} code 
  */
-function searchRequireCalls(code, dir) {
+function searchRequireCalls(code, dir, parentPath) {
   return [...code.matchAll(/require\(('|")(.*)('|")\)/g)]
   .map(
     (item) => item[2]
   ).map((name) => {
-    return path.join(dir, name)
+    return { absolutePath: resolve(name, parentPath), relativePath: name }
   });
 }
